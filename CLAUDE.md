@@ -68,10 +68,14 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 Al iniciar cualquier sesión:
 - Leer `SESSION_HANDOFF.md` para conocer el estado actual y los próximos pasos.
-- Activar el entorno de Python: `.venv\Scripts\activate` (crearlo con `python -m venv .venv` y `pip install -r requirements.txt` si no existe).
+- Activar el entorno de Python (uno por sistema, porque la carpeta del NAS se comparte):
+  - Windows: `.venv\Scripts\activate`
+  - macOS: `source .venv-mac/bin/activate`
+  - Linux: `source .venv-linux/bin/activate`
+  - Si no existe: `python3 -m venv <carpeta>` y `pip install -r requirements.txt`.
 - Al finalizar la sesión, actualizar `SESSION_HANDOFF.md` con lo completado y lo pendiente.
 
-Ruta de trabajo (Windows): `D:\Software mio\Hasher`
+Ruta de trabajo (Windows): `D:\Software mio\Hasher` (copia de trabajo), **siempre sincronizada** con `Y:\Mi software\Hasher` (NAS) mediante `sync_nas.ps1`. Todo cambio debe propagarse a `Y:` al terminar cada tarea; el sync es aditivo (no borra), así que tras mover o eliminar ficheros hay que limpiar los huérfanos en `Y:` a mano.
 Repositorio: https://github.com/letzzar/hasher-informes (rama `main`, licencia GPL-3.0)
 
 Comandos habituales:
