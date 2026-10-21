@@ -1,0 +1,4 @@
+reportlab==5.0.1
+sv-ttk==2.6.1
+darkdetect==0.8.0
+pyinstaller==6.22.3

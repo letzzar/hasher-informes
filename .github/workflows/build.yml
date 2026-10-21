@@ -1,0 +1,86 @@
+name: Build
+
+# Compila Hasher Informes para Windows, macOS y Linux en x86-64 y arm64.
+# - En cada push a main y en ejecuciones manuales: ejecuta los tests, compila y guarda
+#   los paquetes como artefactos de la ejecución (7 días).
+# - Al empujar una etiqueta vX.Y.Z: además publica una Release con los 6 paquetes.
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write   # necesario para crear la Release
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: ${{ matrix.os_name }}-${{ matrix.arch }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { runner: windows-latest,   os_name: windows, arch: x64 }
+          - { runner: windows-11-arm,   os_name: windows, arch: arm64 }
+          - { runner: macos-15-intel,   os_name: macos,   arch: x64 }
+          - { runner: macos-latest,     os_name: macos,   arch: arm64 }
+          - { runner: ubuntu-24.04,     os_name: linux,   arch: x64 }
+          - { runner: ubuntu-24.04-arm, os_name: linux,   arch: arm64 }
+    env:
+      PYTHONUTF8: '1'
+      PYTHONIOENCODING: 'utf-8'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Dependencias del sistema (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libtk8.6 fonts-dejavu-core
+
+      - name: Dependencias de Python
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Tests
+        run: python -m unittest discover -s tests -t . -v
+
+      - name: Compilar y empaquetar
+        run: python scripts/build.py --package
+
+      - name: Guardar paquete
+        uses: actions/upload-artifact@v4
+        with:
+          name: HasherInformes-${{ matrix.os_name }}-${{ matrix.arch }}
+          path: dist/release/*
+          retention-days: 7
+          if-no-files-found: error
+
+  release:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar paquetes
+        uses: actions/download-artifact@v4
+        with:
+          path: packages
+          merge-multiple: true
+
+      - name: Publicar Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: packages/*
