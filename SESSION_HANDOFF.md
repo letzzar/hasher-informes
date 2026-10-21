@@ -25,7 +25,9 @@ Versión **1.1.0** de **Hasher Informes** publicada.
 - Opcional: fijar el runner del job `release` a `ubuntu-24.04` (GitHub avisa de que `ubuntu-latest` migra a Ubuntu 26).
 
 ### Notas para la próxima sesión
-- Sincronizar con el NAS al acabar cada tarea: `powershell -File sync_nas.ps1` → `Y:\Mi software\Hasher` (aditivo, no borra).
+- Sincronizar con el NAS al acabar cada tarea: `powershell -File sync_nas.ps1` → `Y:\Mi software\Hasher` (aditivo, no borra). Última sincronización: 2026-10-21, copia completa (incluye `.git`, `.venv`, `build`, `dist`).
+- Desde macOS/Linux se trabaja sobre la carpeta del NAS: crear `.venv-mac` / `.venv-linux` (el `.venv` es de Windows).
+- En Windows, git rechaza el repo de `Y:` por "dubious ownership" (carpeta de red); trabajar con git en `D:\Software mio\Hasher` o añadir `safe.directory` si el Director lo decide.
 - En este equipo el Bash de Git falla al hacer fork; usar PowerShell.
 - El filtro de seguridad de comandos bloquea algunas órdenes PowerShell que combinan `cd "D:\Software mio\…"` con ciertas palabras (`Remove-Item`, `git remote`, `--renormalize`…): usar `git -C "<ruta>"` y comandos separados.
 - Si la compilación local falla con "acceso denegado", cerrar instancias abiertas de `Hasher Informes.exe` (el modo onefile deja un proceso hijo).
